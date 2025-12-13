@@ -6,6 +6,7 @@
         {
             "matches": ["https://www.youtube.com/*"],
             "js": ["contents.js"],
+            "css": ["styles.css"],
             "run_at": "document_idle"
 
         }
