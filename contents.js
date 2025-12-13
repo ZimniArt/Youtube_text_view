@@ -1,5 +1,3 @@
-console.log("test extension_start");
-
 let textListContainer = document.getElementById("my-text-list");
 
 if(!textListContainer){
@@ -13,25 +11,11 @@ if(!textListContainer){
     
 }
 
-function waitForPageManager(callback) {
-    const obs = new MutationObserver(() =>{
-        const pageManager = document.querySelector("ytd-page-manager");
-        if(pageManager){
-            obs.disconnect();
-            callback(pageManager);
-        }
-    })
-
-    obs.observe(document.documentElement, {
-        childList: true,
-        subtree: true
-    });
-}
 
 waitForPageManager( (pageManager)=>{
     if (!textListContainer.isConnected) {
-    pageManager.prepend(textListContainer);
-}
+        pageManager.prepend(textListContainer);
+    }
 });
 
 
@@ -60,4 +44,20 @@ const observer = new MutationObserver(function observer(){
 });
 
 observer.observe(document.body, {childList: true, subtree: true});   
-console.log("test extension_end");
+
+
+//functions
+function waitForPageManager(callback) {
+    const obs = new MutationObserver(() =>{
+        const pageManager = document.querySelector("ytd-page-manager");
+        if(pageManager){
+            obs.disconnect();
+            callback(pageManager);
+        }
+    })
+
+    obs.observe(document.documentElement, {
+        childList: true,
+        subtree: true
+    });
+}
