@@ -20,28 +20,45 @@ waitForPageManager( (pageManager)=>{
 
 
 const titleList = new Set();
-const observer = new MutationObserver(function observer(){
+
+const observer = new MutationObserver(() => {
     const videos = document.querySelectorAll(".yt-lockup-metadata-view-model__text-container");
-    videos.forEach(
-        function(video){
-            const title = video.querySelector(".yt-lockup-metadata-view-model__title")?.textContent?.trim();
-            
-            if (!title) return;
-            if(titleList.has(title)) return;
-            titleList.add(title);
-            if(title) console.log(title);
-            
-            //adding to container
-            const div = document.createElement("div");
-            div.textContent = title;
-            div.style.marginBottom = "5px";
-            
-            
-            textListContainer.appendChild(div);
-            
-        }
-    )
+
+    videos.forEach(video => {
+        const titleLink = video.querySelector(".yt-lockup-metadata-view-model__title");
+        if (!titleLink) return;
+
+        const title = titleLink.textContent?.trim();
+        const href = titleLink.getAttribute("href");
+
+        if (!title || !href) return;
+        if (titleList.has(title)) return;
+
+        titleList.add(title);
+
+        const link = document.createElement("a");
+        link.textContent = title;
+        link.href = href;
+        link.target = "_self";
+
+        link.style.display = "block";
+        link.style.color = "#fff";
+        link.style.textDecoration = "none";
+        link.style.marginBottom = "6px";
+        link.style.cursor = "pointer";
+
+        link.addEventListener("mouseenter", () => {
+            link.style.textDecoration = "underline";
+        });
+
+        link.addEventListener("mouseleave", () => {
+            link.style.textDecoration = "none";
+        });
+
+        textListContainer.appendChild(link);
+    });
 });
+
 
 observer.observe(document.body, {childList: true, subtree: true});   
 
