@@ -9,7 +9,9 @@ const observer = new MutationObserver(function observer(){
         function(video){
             const title = video.querySelector(".yt-lockup-metadata-view-model__title")?.textContent?.trim();
             
+            if (!title) return;
             if(titleList.has(title)) return;
+
             titleList.add(title);
 
             if(title) console.log(title);
