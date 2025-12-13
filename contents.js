@@ -13,6 +13,27 @@ if(!textListContainer){
     
 }
 
+function waitForPageManager(callback) {
+    const obs = new MutationObserver(() =>{
+        const pageManager = document.querySelector("ytd-page-manager");
+        if(pageManager){
+            obs.disconnect();
+            callback(pageManager);
+        }
+    })
+
+    obs.observe(document.documentElement, {
+        childList: true,
+        subtree: true
+    });
+}
+
+waitForPageManager( (pageManager)=>{
+    if (!textListContainer.isConnected) {
+    pageManager.prepend(textListContainer);
+}
+});
+
 
 const titleList = new Set();
 const observer = new MutationObserver(function observer(){
@@ -31,15 +52,8 @@ const observer = new MutationObserver(function observer(){
             div.textContent = title;
             div.style.marginBottom = "5px";
             
-            let listHome = document.querySelector(".style-scope ytd-page-manager");
-            textListContainer.appendChild(div);
-            if (listHome){
-                listHome.prepend(textListContainer);
-            }
-            else{
-                console.log(listHome+": listHome");
-            }
             
+            textListContainer.appendChild(div);
             
         }
     )
