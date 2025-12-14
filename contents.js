@@ -41,12 +41,19 @@ function HandleHomePage(){
     
     if(!videoListContainer){
         videoListContainer = document.createElement("div");
-        videoListContainer.id = videoList
-        videoListContainer.style.fontSize = "16px";
-        videoListContainer.style.padding = "10px";
-        videoListContainer.style.backgroundColor ="#000";
-        videoListContainer.style.color =  "#fff";
-        videoListContainer.style.flex = "0 0 70%";
+        videoListContainer.id = videoList;
+        videoListContainer.style.position = "fixed";
+        videoListContainer.style.top = "64px"; // below YouTube header
+        videoListContainer.style.left = "10vw";       // start at left edge of viewport
+        videoListContainer.style.right = "2vw";      // stretch to right edge
+        videoListContainer.style.width = "90w";   
+        videoListContainer.style.height = "calc(100vh - 80px)";
+        videoListContainer.style.zIndex = "9999";
+        videoListContainer.style.overflowY = "auto";
+        videoListContainer.style.background = "rgba(0,0,0,0.85)";
+        videoListContainer.style.backdropFilter = "blur(6px)";
+        videoListContainer.style.borderRadius = "5px";
+        videoListContainer.style.boxShadow = "0 8px 30px rgba(0,0,0,0.9)";
         
     }
     
