@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "YouTube Clickable Titles",
+  "name": "YouTube Text Titles",
   "version": "1.0",
   "description": "Shows YouTube video titles as clickable links on Home and Subscriptions pages.",
   "icons": {
