@@ -46,7 +46,7 @@ function HandleHomePage(){
         videoListContainer.style.padding = "10px";
         videoListContainer.style.backgroundColor ="#000";
         videoListContainer.style.color =  "#fff";
-        videoListContainer.style.flex = "0 0 100%";
+        videoListContainer.style.flex = "0 0 70%";
         
     }
     
