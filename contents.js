@@ -1,52 +1,53 @@
 let watchPage = "watch";
 let homePage = "home";
+let subscriptionsPage = "subscriptions";
 let otherPage = "other";
 let videoList = "my-video-list";
 let pageManager = "ytd-page-manager";
 
-//this specific youtube event firing at mutation points
+// YouTube navigation event
 window.addEventListener("yt-navigate-finish", handlePage);
 
 let currentPage = null;
 let newPage = null;
-
 let observer = null;
 
-function getPageType(){
-    if(location.pathname === "/watch") return watchPage;
-    if(location.pathname === "/") return homePage;
-    else return otherPage;
+function getPageType() {
+    if (location.pathname === "/watch") return watchPage;
+    if (location.pathname === "/") return homePage;
+    if (location.pathname === "/feed/subscriptions") return subscriptionsPage;
+    return otherPage;
 }
 
-function handlePage(){
-
+function handlePage() {
     newPage = getPageType();
-    if(newPage===currentPage) return;
-    currentPage=newPage;
-    if(observer){
-        StopObserver();
-    }
+    if (newPage === currentPage) return;
+    currentPage = newPage;
 
-    if(newPage ===watchPage) HandleWatchPage();
-    if(newPage ===homePage)HandleHomePage();
-    if(newPage ===otherPage)HandeleOtherPage();
+    if (observer) stopObserver();
+
+    switch (newPage) {
+        case watchPage: handleWatchPage(); break;
+        case homePage: handleVideoListPage(); break;
+        case subscriptionsPage: handleVideoListPage(); break;
+      //  case otherPage: handleOtherPage(); break;
+    }
 }
 handlePage();
 
-function HandleHomePage(){
-
-    console.log("going to Home page");
+// Unified handler for pages with video lists (home & subscriptions)
+function handleVideoListPage() {
+    console.log("Video list page:", location.pathname);
 
     let videoListContainer = document.getElementById(videoList);
     
-    if(!videoListContainer){
+    if (!videoListContainer) {
         videoListContainer = document.createElement("div");
         videoListContainer.id = videoList;
         videoListContainer.style.position = "fixed";
-        videoListContainer.style.top = "64px"; // below YouTube header
-        videoListContainer.style.left = "10vw";       // start at left edge of viewport
-        videoListContainer.style.right = "2vw";      // stretch to right edge
-        videoListContainer.style.width = "90w";   
+        videoListContainer.style.top = "64px";
+        videoListContainer.style.left = "5vw";
+        videoListContainer.style.right = "2vw";
         videoListContainer.style.height = "calc(100vh - 80px)";
         videoListContainer.style.zIndex = "9999";
         videoListContainer.style.overflowY = "auto";
@@ -54,32 +55,66 @@ function HandleHomePage(){
         videoListContainer.style.backdropFilter = "blur(6px)";
         videoListContainer.style.borderRadius = "5px";
         videoListContainer.style.boxShadow = "0 8px 30px rgba(0,0,0,0.9)";
-        
     }
-    
-    waitForPageManager( (pageManager)=>{
+
+    waitForPageManager(pageManagerNode => {
         if (!videoListContainer.isConnected) {
-            pageManager.prepend(videoListContainer);
+            pageManagerNode.prepend(videoListContainer);
         }
     });
-    
-    const titleList = new Set();  
+
+    // --- Reset the list and set every page load ---
+    const titleSet = new Set();  
     videoListContainer.innerHTML = "";
 
-    AddvideosToList(videoListContainer, titleList);
+    addVideosToList(videoListContainer, titleSet);
 
+    if (observer) observer.disconnect(); // disconnect previous observer
+
+    observer = new MutationObserver(() => addVideosToList(videoListContainer, titleSet));
+    observer.observe(document.body, { childList: true, subtree: true });
+}
+
+function handleWatchPage() {
+    console.log("Watch page");
     observer = new MutationObserver(() => {
-        AddvideosToList(videoListContainer, titleList);
+        const removeBlock = document.querySelector("ytd-watch-next-secondary-results-renderer");
+        if (removeBlock) removeBlock.remove();
     });
-    
-    observer.observe(document.body, {childList: true, subtree: true});   
-    
-    
-    
-}    
+    observer.observe(document.body, { childList: true, subtree: true });
+}
 
-function AddvideosToList(videoListContainer, titleList){
+function handleOtherPage() {
+    console.log("Other page:", location.pathname);
+}
 
+function stopObserver() {
+    if (!observer) return;
+    observer.disconnect();
+    observer = null;
+}
+
+// Wait for page manager element to appear
+function waitForPageManager(callback) {
+    const existing = document.querySelector(pageManager);
+    if (existing) {
+        callback(existing);
+        return;
+    }
+
+    const obs = new MutationObserver(() => {
+        const node = document.querySelector(pageManager);
+        if (node) {
+            obs.disconnect();
+            callback(node);
+        }
+    });
+
+    obs.observe(document.documentElement, { childList: true, subtree: true });
+}
+
+// Add videos to your custom list
+function addVideosToList(container, titleSet) {
     const videos = document.querySelectorAll(".yt-lockup-metadata-view-model__text-container");
 
     videos.forEach(video => {
@@ -89,67 +124,24 @@ function AddvideosToList(videoListContainer, titleList){
         const title = titleLink.textContent?.trim();
         const href = titleLink.getAttribute("href");
 
-        if (!title || !href) return;
-        if (titleList.has(title)) return;
+        if (!title || !href || titleSet.has(title)) return;
 
-        titleList.add(title);
+        titleSet.add(title);
 
         const link = document.createElement("a");
         link.textContent = title;
         link.href = href;
         link.target = "_self";
-
         link.style.display = "block";
         link.style.color = "#fff";
         link.style.textDecoration = "none";
-        link.style.marginBottom = "6px";
+        link.style.marginLeft = "10px";
+        link.style.marginBottom = "8px";
         link.style.cursor = "pointer";
 
-        link.addEventListener("mouseenter", () => {
-            link.style.textDecoration = "underline";
-        });
+        link.addEventListener("mouseenter", () => link.style.textDecoration = "underline");
+        link.addEventListener("mouseleave", () => link.style.textDecoration = "none");
 
-        link.addEventListener("mouseleave", () => {
-            link.style.textDecoration = "none";
-        });
-
-        videoListContainer.appendChild(link);
+        container.appendChild(link);
     });
-}
-function HandleWatchPage(){
-    console.log("going to Watch page");
-    
-    observer = new MutationObserver(()=>{
-        const removeBlock = document.querySelector(".style-scope ytd-watch-next-secondary-results-renderer");
-        if (removeBlock) {
-            removeBlock.remove();
-        }
-        
-    })
-    observer.observe(document.body, {childList: true, subtree: true});
-}
-
-function StopObserver(){
-    if (!observer) return;
-    console.log(" observer disconected");
-    observer.disconnect();
-    observer = null;
-}
-function waitForPageManager(callback) {
-
-    const existing = document.querySelector(pageManager);
-    if (existing) {
-        callback(existing);
-        return;
-    }
-
-    const obs = new MutationObserver(() => {
-        const pageManager_exist = document.querySelector(pageManager);
-        if (pageManager_exist) {
-            obs.disconnect();
-            callback(pageManager_exist);
-        }
-    });
-
-    obs.observe(document.documentElement, { childList: true, subtree: true });
 }
